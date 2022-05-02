@@ -14,7 +14,7 @@ namespace BruteForceZipPasswordCracker
         private BlockingCollection<string> passwordQueue;
         private CancellationToken cancellationToken;
 
-        public PasswordGenerator(string initialPassword = "", BlockingCollection<string> passwordQueue)
+        public PasswordGenerator(BlockingCollection<string> passwordQueue, string initialPassword = "")
         {
             this.passwordBuilder = new StringBuilder(initialPassword);
             this.passwordQueue = passwordQueue;

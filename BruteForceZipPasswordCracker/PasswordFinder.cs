@@ -39,11 +39,11 @@ namespace BruteForceZipPasswordCracker
         {
             if (!File.Exists(fileName))
             {
-                passwordResponse.TrySetException(new ZipFileNotExistentException);
+                passwordResponse.TrySetException(new ZipFileNotExistentException());
             }
             else if(!IsPasswordProtected())
             {
-                passwordResponse.TrySetException(new ZipFileNotPasswordProtectedException);
+                passwordResponse.TrySetException(new ZipFileNotPasswordProtectedException());
             }
 
             while (!passwordResponse.Task.IsCompleted)
