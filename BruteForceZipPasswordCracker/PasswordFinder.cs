@@ -18,16 +18,17 @@ namespace BruteForceZipPasswordCracker
         // Exception in case Zip file is not password protected
         class ZipFileNotPasswordProtectedException : Exception
         { }
-        public string FoundPassword;
+        public string FoundPassword { get; set; }
 
         private string fileName;
         private TaskCompletionSource<string> passwordResponse;
-        private BlockingCollection<string> passwordQueue;
+        private PasswordCollection passwordQueue;
         
-        public PasswordFinder(string fileName,TaskCompletionSource<string> passwordResponse)
+        public PasswordFinder(string fileName,TaskCompletionSource<string> passwordResponse, PasswordCollection passQ)
         {
             this.fileName = fileName;
             this.passwordResponse = passwordResponse;
+            this.passwordQueue = passQ;
         }
 
         public async Task Run()
@@ -55,6 +56,7 @@ namespace BruteForceZipPasswordCracker
                 if (passwordFound)
                 {
                     passwordResponse.SetResult(currentPassword);
+                    Console.WriteLine(FoundPassword);
                 }
             }
         }
@@ -71,7 +73,7 @@ namespace BruteForceZipPasswordCracker
             try
             {
                 passwordFound = ZipFile.CheckZipPassword(fileName,password);
-                if (passwordFound == true)
+                if (passwordFound)
                 {
                     this.FoundPassword = password;
                 }

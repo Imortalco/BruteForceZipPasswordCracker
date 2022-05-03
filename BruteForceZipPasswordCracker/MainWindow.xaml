@@ -7,6 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Button Content="Button" Height="50" Width="50" Click="Button_Click"/>
+        <TextBox Name="Output" Text="TextBox" Width="120" Height="20" VerticalAlignment="Top" Margin="25"/>
+        <TextBox Name="Input" Text="aerf" Width="120" Height="20" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>

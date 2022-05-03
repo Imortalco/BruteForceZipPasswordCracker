@@ -11,13 +11,14 @@ namespace BruteForceZipPasswordCracker
     internal class PasswordGenerator
     {
         private StringBuilder passwordBuilder;
-        private BlockingCollection<string> passwordQueue;
+        private PasswordCollection passwordQueue;
         private CancellationToken cancellationToken;
 
-        public PasswordGenerator(BlockingCollection<string> passwordQueue, string initialPassword = "")
+        public PasswordGenerator(PasswordCollection passwordQueue, CancellationToken cancellationToken , string initialPassword = "")
         {
             this.passwordBuilder = new StringBuilder(initialPassword);
             this.passwordQueue = passwordQueue;
+            this.cancellationToken = cancellationToken;
         }
 
         public async Task Run()
@@ -35,7 +36,7 @@ namespace BruteForceZipPasswordCracker
                     passwordQueue.Add(nextPassword, cancellationToken);
                 }
             }
-            catch(OperationCanceledException)
+            catch
             { }
         }
         private string NextPassword()
@@ -82,7 +83,7 @@ namespace BruteForceZipPasswordCracker
 
         private void AddNewDigit()
         {
-            passwordBuilder.Append('0');
+            passwordBuilder.Append("0");
         }
 
         private int NextDigit(int currentDigit)
