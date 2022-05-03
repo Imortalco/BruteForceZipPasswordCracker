@@ -30,14 +30,25 @@ namespace BruteForceZipPasswordCracker
         {
             try
             {
-                while (!cancellationToken.IsCancellationRequested)
+                while (true)
                 {
                     string nextPassword = NextPassword();
-                    passwordQueue.Add(nextPassword, cancellationToken);
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        passwordQueue.Add(nextPassword, cancellationToken);
+                    }
+                    else
+                    {
+                        break;
+                    }
+
                 }
             }
-            catch
-            { }
+            catch (OperationCanceledException)
+            {
+
+            } 
+            
         }
         private string NextPassword()
         {
@@ -61,7 +72,7 @@ namespace BruteForceZipPasswordCracker
 
                 while (!stop)
                 {
-                    passwordBuilder[counter] = (char)NextDigit(int.Parse(passwordBuilder[counter].ToString()));
+                    passwordBuilder[counter] = NextDigit(passwordBuilder[counter]);
 
                     if(passwordBuilder[counter] == '0')
                     {
@@ -86,8 +97,9 @@ namespace BruteForceZipPasswordCracker
             passwordBuilder.Append("0");
         }
 
-        private int NextDigit(int currentDigit)
+        private char NextDigit(char currentChar)
         {
+            int currentDigit = int.Parse(currentChar.ToString());
             int nextDigit;
             
             if(currentDigit == 9)
@@ -99,7 +111,7 @@ namespace BruteForceZipPasswordCracker
                 nextDigit = ++currentDigit;
             }
 
-            return nextDigit;
+            return char.Parse(nextDigit.ToString());
         }
 
     }

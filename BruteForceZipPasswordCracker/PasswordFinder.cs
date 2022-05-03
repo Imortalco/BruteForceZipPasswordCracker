@@ -53,10 +53,10 @@ namespace BruteForceZipPasswordCracker
 
                 bool passwordFound = TryPassword(currentPassword);
 
-                if (passwordFound)
+                if (passwordFound == true)
                 {
                     passwordResponse.SetResult(currentPassword);
-                    Console.WriteLine(FoundPassword);
+                    break;
                 }
             }
         }
@@ -70,15 +70,13 @@ namespace BruteForceZipPasswordCracker
         {
             bool passwordFound = false;
 
-            try
-            {
+           
                 passwordFound = ZipFile.CheckZipPassword(fileName,password);
-                if (passwordFound)
+                if (passwordFound == true)
                 {
                     this.FoundPassword = password;
                 }
-            }
-            catch { }
+            
 
             return passwordFound;
         }

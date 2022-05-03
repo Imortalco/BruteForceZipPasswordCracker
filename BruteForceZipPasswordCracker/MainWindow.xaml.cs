@@ -40,20 +40,14 @@ namespace BruteForceZipPasswordCracker
                 var password_queue = new PasswordCollection();
 
                 // Create and add password producer
-                var pwd_producer = new PasswordGenerator(password_queue, token_src.Token, "11");
+                var pwd_producer = new PasswordGenerator(password_queue, token_src.Token, "0");
                 task_list.Add(pwd_producer.Run());
 
-                // Create and add log consumer
-                //var log_consumer = new LogConsumerActivity(cThreadsNum, log_msg_queue, token_src.Token);
-                //task_list.Add(log_consumer.Run());
-
-                // Start stopwatch
                 Stopwatch stop_watch = new Stopwatch();
                 stop_watch.Start();
 
-                // Create and add password consumers 
                 TaskCompletionSource<string> password_src = new TaskCompletionSource<string>();
-                for (int i = 1; i <= 3; i++)
+                for (int i = 1; i <= 10; i++)
                 {
                     var pwd_consumer = new PasswordFinder(Input.Text, password_src, password_queue);
                     task_list.Add(pwd_consumer.Run());
@@ -67,6 +61,7 @@ namespace BruteForceZipPasswordCracker
                     // Log password
                     //LogPassword(password_res.Result);
                     Output.Text = password_res.Result;
+                    token_src.Cancel();
                 }
                 catch (Exception ex)
                 {
@@ -81,9 +76,9 @@ namespace BruteForceZipPasswordCracker
                     // Stop stopwatch
                     stop_watch.Stop();
                     // Cancel the other tasks (log consumer and password producer)
-                    token_src.Cancel();
+                    MessageBox.Show(stop_watch.Elapsed.ToString());
                     // Wait for all to finish
-                    Task.WaitAll(task_list.ToArray());
+                    //Task.WaitAll(task_list.ToArray());
                     // Print elapsed time
                     //Console.WriteLine(String.Format("Elapsed time: {0}", stop_watch.Elapsed));
                 }
