@@ -2,25 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace BruteForceZipPasswordCracker
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -28,71 +15,76 @@ namespace BruteForceZipPasswordCracker
             InitializeComponent();
         }
 
+        class ZipFileNotExistentException : Exception
+        { }
+
+        class ZipFileNotPasswordProtectedException : Exception
+        { }
+
         public void CrackPassword()
         {
-            using (CancellationTokenSource token_src = new CancellationTokenSource())
+            using (CancellationTokenSource tokenSource = new CancellationTokenSource())
             {
-                // Create task list
-                List<Task> task_list = new List<Task>();
 
-                // Create queues
-                //var log_msg_queue = new LogMessageQueue();
-                var password_queue = new PasswordCollection();
+                List<Task> taskList = new List<Task>();
 
-                // Create and add password producer
-                var pwd_producer = new PasswordGenerator(password_queue, token_src.Token, "0");
-                task_list.Add(pwd_producer.Run());
+                var passwordQueue = new  BlockingCollection<string>();
 
-                Stopwatch stop_watch = new Stopwatch();
-                stop_watch.Start();
+                var generator = new PasswordGenerator(passwordQueue, tokenSource.Token, "0");
+                taskList.Add(generator.Run());
 
-                TaskCompletionSource<string> password_src = new TaskCompletionSource<string>();
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+
+                TaskCompletionSource<string> passwordResponse = new TaskCompletionSource<string>();
                 for (int i = 1; i <= 10; i++)
                 {
-                    var pwd_consumer = new PasswordFinder(Input.Text, password_src, password_queue);
-                    task_list.Add(pwd_consumer.Run());
+                    var pwd_consumer = new PasswordFinder(Input.Text, passwordResponse, passwordQueue);
+                    taskList.Add(pwd_consumer.Run());
                 }
 
+                bool Handled = true;
                 try
                 {
-                    // Wait for password to be found
-                    Task<string> password_res = password_src.Task;
-                    password_res.Wait();
-                    // Log password
-                    //LogPassword(password_res.Result);
-                    Output.Text = password_res.Result;
-                    token_src.Cancel();
+                    Task<string> passwordTasks = passwordResponse.Task;
+                    passwordTasks.Wait();
+                    Output.Text = passwordTasks.Result;
                 }
                 catch (Exception ex)
                 {
-                    // Re-throw exception if cannot be handled
-                    /*if (!HandleException(ex))
-                    {
-                        throw;
-                    }*/
+                    Handled = HandleError(ex);
                 }
                 finally
                 {
-                    // Stop stopwatch
-                    stop_watch.Stop();
-                    // Cancel the other tasks (log consumer and password producer)
-                    MessageBox.Show(stop_watch.Elapsed.ToString());
-                    // Wait for all to finish
-                    //Task.WaitAll(task_list.ToArray());
-                    // Print elapsed time
-                    //Console.WriteLine(String.Format("Elapsed time: {0}", stop_watch.Elapsed));
+                    stopWatch.Stop();
+                    tokenSource.Cancel();
+                    if (Handled)
+                        MessageBox.Show(stopWatch.Elapsed.ToString());
                 }
             }
         }
 
-        // Print header
-
+        private bool HandleError(Exception ex)
+        {
+            
+            if(ex is AggregateException)
+            {
+                switch (ex.InnerException.Message) 
+                {
+                    case "Exception of type 'BruteForceZipPasswordCracker.PasswordFinder+ZipFileNotExistentException' was thrown.": 
+                        MessageBox.Show("Zip file does not exist!", "Error", MessageBoxButton.OK, MessageBoxImage.Error); break;
+                    case "Exception of type 'BruteForceZipPasswordCracker.PasswordFinder+ZipFileNotPasswordProtectedException' was thrown.":
+                        MessageBox.Show("Zip file does not exist!", "Error", MessageBoxButton.OK, MessageBoxImage.Error); break;
+                }
+                return false;
+            }
+            return true;
+        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             CrackPassword();
         }
     }
-
     
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
@@ -11,10 +9,10 @@ namespace BruteForceZipPasswordCracker
     internal class PasswordGenerator
     {
         private StringBuilder passwordBuilder;
-        private PasswordCollection passwordQueue;
+        private BlockingCollection<string> passwordQueue;
         private CancellationToken cancellationToken;
 
-        public PasswordGenerator(PasswordCollection passwordQueue, CancellationToken cancellationToken , string initialPassword = "")
+        public PasswordGenerator(BlockingCollection<string> passwordQueue, CancellationToken cancellationToken , string initialPassword = "")
         {
             this.passwordBuilder = new StringBuilder(initialPassword);
             this.passwordQueue = passwordQueue;
@@ -44,11 +42,7 @@ namespace BruteForceZipPasswordCracker
 
                 }
             }
-            catch (OperationCanceledException)
-            {
-
-            } 
-            
+            catch (OperationCanceledException){ }             
         }
         private string NextPassword()
         {
