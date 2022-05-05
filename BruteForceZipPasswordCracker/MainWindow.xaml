@@ -16,7 +16,7 @@
 
         <Button Content="Unlock" Height="30" Width="90"  Click="Button_Click" Margin="255,108,255,346" />
         
-        <ListBox Name="listBox" d:ItemsSource="{Binding Path=log}" Margin="211,159,201,73"/>
+        <ListBox Name="listBox" Margin="211,159,201,73"/>
         <Label Name="Output" FontWeight="DemiBold"  Margin="233,416,233,26"/>
         
 

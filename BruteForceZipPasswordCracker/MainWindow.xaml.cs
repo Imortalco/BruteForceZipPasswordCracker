@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -15,34 +14,30 @@ namespace BruteForceZipPasswordCracker
 {
     public partial class MainWindow : Window
     {
-        public ObservableCollection<string> log { get; set; }
         public MainWindow()
         {
-            log = new ObservableCollection<string>();
             InitializeComponent();
-            DataContext = this;
         }
 
         public void CrackPassword()
         {
             using (CancellationTokenSource tokenSource = new CancellationTokenSource())
             {
-                List<Task> taskList = new List<Task>();
                 
                 var passwordQueue = new  BlockingCollection<string>();
 
                 var generator = new PasswordGenerator(passwordQueue, tokenSource.Token, "0");
    
-                taskList.Add(generator.Run());
+                generator.Run();
 
                 TaskCompletionSource<string> passwordResponse = new TaskCompletionSource<string>();
                
                 List<PasswordFinder> passwordFinders = new List<PasswordFinder>();
                 for (int i = 1; i <= int.Parse(threadBox.Text); i++)
                 {
-                    var passwordFinder = new PasswordFinder(Input.Text, passwordResponse, passwordQueue,i);
+                    var passwordFinder = new PasswordFinder(Input.Text, passwordResponse, passwordQueue, tokenSource.Token,i);
                     passwordFinders.Add(passwordFinder);
-                    taskList.Add(passwordFinder.Run());
+                    passwordFinder.Run();
                 }
 
                 bool Handled = true;
@@ -56,7 +51,8 @@ namespace BruteForceZipPasswordCracker
                     passwordTasks.Wait();
                     
                     Output.Content = "Password is " + passwordTasks.Result;
-                    ShowLog(passwordFinders, int.Parse(threadBox.Text));
+                    ShowLogs(passwordFinders);
+                    
                 }
                 catch (Exception ex)
                 {
@@ -64,10 +60,11 @@ namespace BruteForceZipPasswordCracker
                 }
                 finally
                 {
-                    stopWatch.Stop();
                     tokenSource.Cancel();
+                    stopWatch.Stop();
                     if (Handled)
                         MessageBox.Show("Time: " + stopWatch.Elapsed.ToString("mm\\:ss\\:fffffff"), "Finding Time", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ShowLastLog(passwordFinders);
                 }
             }
         }
@@ -111,9 +108,9 @@ namespace BruteForceZipPasswordCracker
             e.Handled = regex.IsMatch(e.Text);
         }
 
-        private void ShowLog(List<PasswordFinder> passwordFinders, int numOfThreads)
+        private void ShowLogs(List<PasswordFinder> passwordFinders)
         {
-            
+
             for (int i = 0; i < passwordFinders.Max(s => s.log.Count); i++)
             {
                 for (int j = 0; j < passwordFinders.Count; j++)
@@ -121,20 +118,23 @@ namespace BruteForceZipPasswordCracker
                     listBox.Items.Add(passwordFinders[j].log[i]);
                 }
             }
+        }
 
-            //Ebalo si e maykata
-            string lastMsg = "";
+        private void ShowLastLog(List<PasswordFinder> passwordFinders)
+        {
+            string lastLog = "";
             foreach (PasswordFinder passwordFinder in passwordFinders)
             {
-                lastMsg = passwordFinder.log.FirstOrDefault(s => s.Contains("found"));
-                if (lastMsg != null)
+                lastLog = passwordFinder.log.FirstOrDefault(s => s.Contains("found"));
+                if (lastLog != null)
                 {
                     break;
                 }
-            }  
-            listBox.Items.Add(lastMsg);
-            listBox.SelectedItem = lastMsg;
+            }
+            listBox.Items.Add(lastLog);
+            listBox.SelectedItem = lastLog;
         }
+
     }
-    
+
 }

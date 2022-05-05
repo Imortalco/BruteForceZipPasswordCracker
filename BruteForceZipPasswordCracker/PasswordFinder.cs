@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using Ionic.Zip;
+using System.Threading;
+
 
 namespace BruteForceZipPasswordCracker
 {
@@ -22,21 +23,24 @@ namespace BruteForceZipPasswordCracker
         private TaskCompletionSource<string> passwordResponse;
         private BlockingCollection<string> passwordQueue;
         private int currentThreadIndex;
-        
-       
-        
-        public PasswordFinder(string fileName,TaskCompletionSource<string> passwordResponse, BlockingCollection<string> passwordQueue,int index)
+        private CancellationToken cancellationToken;
+
+
+
+
+        public PasswordFinder(string fileName,TaskCompletionSource<string> passwordResponse, BlockingCollection<string> passwordQueue, CancellationToken cancellationToken,int index)
         {
             this.fileName = fileName;
             this.passwordResponse = passwordResponse;
             this.passwordQueue = passwordQueue;
+            this.cancellationToken = cancellationToken;
             this.currentThreadIndex = index;
             this.log = new List<string>();
         }
 
         public async Task Run()
         {
-            await Task.Run(() => this.FindPassword());
+            await Task.Run(() => this.FindPassword(),cancellationToken);
         }
 
         private void FindPassword()
@@ -60,9 +64,10 @@ namespace BruteForceZipPasswordCracker
                 if (passwordFound == true)
                 {
                     passwordResponse.SetResult(currentPassword);
-                    
+                    log.RemoveAt(log.Count - 1);
                     log.Add("Thread " + currentThreadIndex + ": found " + currentPassword);
                     break;
+
                 }
             }
         }

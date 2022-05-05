@@ -23,7 +23,7 @@ namespace BruteForceZipPasswordCracker
 
         public async Task Run()
         {
-            await Task.Run(() => this.AddNextPasswordToQueue());
+            await Task.Run(() => this.AddNextPasswordToQueue(),cancellationToken);
         }
 
         private void AddNextPasswordToQueue()
