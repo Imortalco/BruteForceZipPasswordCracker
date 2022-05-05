@@ -48,7 +48,8 @@ namespace BruteForceZipPasswordCracker
                 {
                     Task<string> passwordTasks = passwordResponse.Task;
                     passwordTasks.Wait();
-                    Output.Text = passwordTasks.Result;
+                    Pass.Visibility = Visibility.Visible;
+                    Output.Content = passwordTasks.Result;
                 }
                 catch (Exception ex)
                 {
@@ -59,7 +60,7 @@ namespace BruteForceZipPasswordCracker
                     stopWatch.Stop();
                     tokenSource.Cancel();
                     if (Handled)
-                        MessageBox.Show(stopWatch.Elapsed.ToString());
+                        MessageBox.Show("Time: " + stopWatch.Elapsed.ToString("mm\\:ss\\:fffffff"), "Finding Time", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -83,7 +84,11 @@ namespace BruteForceZipPasswordCracker
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            Pass.Visibility = Visibility.Hidden;
+            Output.Content = "";
             CrackPassword();
+
+
         }
     }
     
