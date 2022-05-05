@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace BruteForceZipPasswordCracker
 {
@@ -12,11 +14,11 @@ namespace BruteForceZipPasswordCracker
         private BlockingCollection<string> passwordQueue;
         private CancellationToken cancellationToken;
 
-        public PasswordGenerator(BlockingCollection<string> passwordQueue, CancellationToken cancellationToken , string initialPassword = "")
+        public PasswordGenerator(BlockingCollection<string> passwordQueue, CancellationToken cancellationToken,string initialPassword = "")
         {
             this.passwordBuilder = new StringBuilder(initialPassword);
             this.passwordQueue = passwordQueue;
-            this.cancellationToken = cancellationToken;
+            this.cancellationToken = cancellationToken;  
         }
 
         public async Task Run()
@@ -31,6 +33,7 @@ namespace BruteForceZipPasswordCracker
                 while (true)
                 {
                     string nextPassword = NextPassword();
+                    
                     if (!cancellationToken.IsCancellationRequested)
                     {
                         passwordQueue.Add(nextPassword, cancellationToken);
@@ -39,7 +42,6 @@ namespace BruteForceZipPasswordCracker
                     {
                         break;
                     }
-
                 }
             }
             catch (OperationCanceledException){ }             
