@@ -25,9 +25,6 @@ namespace BruteForceZipPasswordCracker
         private int currentThreadIndex;
         private CancellationToken cancellationToken;
 
-
-
-
         public PasswordFinder(string fileName,TaskCompletionSource<string> passwordResponse, BlockingCollection<string> passwordQueue, CancellationToken cancellationToken,int index)
         {
             this.fileName = fileName;

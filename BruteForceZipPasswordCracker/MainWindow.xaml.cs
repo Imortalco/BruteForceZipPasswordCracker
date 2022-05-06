@@ -110,8 +110,8 @@ namespace BruteForceZipPasswordCracker
 
         private void ShowLogs(List<PasswordFinder> passwordFinders)
         {
-
-            for (int i = 0; i < passwordFinders.Max(s => s.log.Count); i++)
+            int n = passwordFinders.Min(s => s.log.Count);
+            for (int i = n - n*19/20; i < n; i++)
             {
                 for (int j = 0; j < passwordFinders.Count; j++)
                 {
@@ -134,7 +134,5 @@ namespace BruteForceZipPasswordCracker
             listBox.Items.Add(lastLog);
             listBox.SelectedItem = lastLog;
         }
-
     }
-
 }
